@@ -15,6 +15,7 @@
   "dependencies": {
     "chai": "4.1.2",
     "mocha": "5.2.0",
-    "shortid": "2.2.8"
+    "ramda": "0.25.0",
+    "xlsx": "0.13.0"
   }
 }

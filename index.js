@@ -1,31 +1,23 @@
-const R           = require('ramda');
-const xlsx        = require('xlsx');
-const fs          = require('fs');
-const charString  = 'abcdefghijklmnopqrstuvwxyz0123456789';
-
-const allowedDataTypes = ['object', 'boolean', 'number', 'string']
+const R                = require('ramda')
+const xlsx             = require('xlsx')
+const fs               = require('fs')
+const randomCharString = 'abcdefghijklmnopqrstuvwxyz0123456789'
+const allowedDataTypes = ['object', 'boolean', 'number', 'string', 'date']
 const columnsList      = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
-
-var LocalExcelAdaptor = R.curry(function(options){  
-  this.workbook          = null;
-  this.columnArray       = [];
-  this.lastRowIndex      = 1;
+var LocalExcelAdaptor = R.curry(function(options){
+  this.workbook          = null
+  this.columnArray       = []
+  this.lastRowIndex      = 1
   
+  this.excelSheetName    = R.isEmpty(sanitizeString(options.sheetName)) ? 'Sheet 1' : sanitizeString(options.sheetName)
 
-  // Check for boolean type in autocast
-  this.autocast          = options.autocast
-  ? true
-  : false;
-  
-  this.excelSheetName    = R.isEmpty(sanitizeString(options.sheetName))
-  ? 'Sheet 1'
-  : sanitizeString(options.sheetName);
+  this.excelFileName     = sanitizeString(options.fileName)
+  this.storagePath       = sanitizeString(options.path)
 
-  this.excelFileName     = sanitizeString(options.fileName);
-  this.storagePath       = sanitizeString(options.path);
-
-});
+  // Check for boolean type in autoCast
+  this.autoCast          = options.autoCast ? true : false
+})
 
 /**
  * @param {Array} columnArray - array of objects with columnName & dataType
@@ -34,28 +26,30 @@ var LocalExcelAdaptor = R.curry(function(options){
 */
 LocalExcelAdaptor.prototype.createColumns = function(columnArray) {
   // Rename columnArray to excelColumns
-  var that = this;
+  var that = this
   return new Promise(function(resolve, reject){
     // validate the columnArray.
     validateColumnsArray(columnArray)
+
     that.columnArray = columnArray
 
     // array of columns to be created inside excel spreadsheet
-    var excelSheetColumns = [];
+    var excelSheetColumns = []
 
     // Sets width for each cell inside an excel spreadsheet
     that.columnArray.forEach(function() {
       excelSheetColumns.push({
-        wch:25
+        wch : 25
       })
     })
 
-    var lastCell = getCellName(that.columnArray.length - 1, 1);
+    var lastCellRef = getCellName(that.columnArray.length - 1, 1)
+
     that.workbook = {
       SheetNames: [that.excelSheetName],
       Sheets : {
         [that.excelSheetName] : {
-          '!ref': 'A1:' + lastCell,
+          '!ref' : 'A1: ' + lastCellRef,
           '!cols': excelSheetColumns  
         }
       }
@@ -68,7 +62,7 @@ LocalExcelAdaptor.prototype.createColumns = function(columnArray) {
       }
     }
 
-    resolve();
+    resolve()
   })
 }
 
@@ -77,50 +71,52 @@ LocalExcelAdaptor.prototype.createColumns = function(columnArray) {
  * @returns {number} rowIndex of last inserted object.
 */
 LocalExcelAdaptor.prototype.addObjects = function(excelSheetRows) {
-  var that = this;
+  var that = this
   return new Promise(function(resolve, reject){
     // validate workbook instance
-    validateWorkBook(that.workbook);
+    validateWorkBook(that.workbook)
+
     // validate the columnArray.
-    validateColumnsArray(that.columnArray);
+    validateColumnsArray(that.columnArray)
+
     // validate the excelSheetRows.
-    validateRowsArray(excelSheetRows);
+    validateRowsArray(excelSheetRows)
+
     // validate the lastRowIndex
-    validatelastRowIndex(that.lastRowIndex);
+    validatelastRowIndex(that.lastRowIndex)
 
     // increase the ref rows in workbook sheet if the number of rows increase in excelSheetRows
-    var lastCell = getCellName(that.columnArray.length - 1 , that.lastRowIndex + excelSheetRows.length);
+    var lastCellRef = getCellName(that.columnArray.length - 1 , that.lastRowIndex + excelSheetRows.length)
 
     // update the workbook ref rows. 
-    that.workbook.Sheets[that.excelSheetName]['!ref'] = 'A1:' + lastCell;
+    that.workbook.Sheets[that.excelSheetName]['!ref'] = 'A1:' + lastCellRef
     
     // creates excel rows in workbook from data in excelSheetRows 
     excelSheetRows.forEach(function(excelSheetRow) {
-      var excelValue = null;
-      var dataType   = null;
+      var excelValue = null
+      var dataType   = null
 
-      that.lastRowIndex = that.lastRowIndex + 1; // MOVE ON TO NEXT CELL IN SPREADSHEET TO ADD DATA
+      that.lastRowIndex = that.lastRowIndex + 1 // MOVE ON TO NEXT CELL IN SPREADSHEET TO ADD DATA
 
       for(var columnIndex = 0 ; columnIndex < that.columnArray.length ; columnIndex++) {
-
-        excelValue = excelSheetRow[that.columnArray[columnIndex].columnName]; 
-        dataType   = that.columnArray[columnIndex].dataType.toLowerCase();
+        excelValue = excelSheetRow[that.columnArray[columnIndex].columnName]
+        dataType   = that.columnArray[columnIndex].dataType.toLowerCase()
 
         if (R.isNil(excelValue)){
           continue
         }
 
-        if (that.autocast) {
-          excelValue = autocast(excelValue, dataType);
+        if (that.autoCast) {
+          excelValue = autoCast(excelValue, dataType)
         }
         
-        if (typeof excelValue !== dataType){
-          console.log(excelValue, typeof excelValue, dataType)
-          continue;
-        }
+        // if (typeof excelValue !== dataType){
+        //   console.log(excelValue, typeof excelValue, dataType)
+        //   continue
+        // }
 
         if(R.is(Object, excelValue)){
-          excelValue = JSON.stringify(excelValue);
+          excelValue = JSON.stringify(excelValue)
         }
 
         that.workbook.Sheets[that.excelSheetName][getCellName(columnIndex, that.lastRowIndex )] = {
@@ -130,7 +126,7 @@ LocalExcelAdaptor.prototype.addObjects = function(excelSheetRows) {
       }
     })
 
-    resolve(that.lastRowIndex);
+    resolve(that.lastRowIndex)
   })
 }
 
@@ -138,23 +134,19 @@ LocalExcelAdaptor.prototype.addObjects = function(excelSheetRows) {
  * writes the file in directory, reject errors if any
 */
 LocalExcelAdaptor.prototype.downloadFile = function() {
-  var that = this;
+  var that = this
   return new Promise(function(resolve, reject){
     // validate workbook object
-    validateWorkBook(that.workbook);
+    validateWorkBook(that.workbook)
 
-    var fileName = R.isEmpty(that.excelFileName)
-    ? randomString(6,charString)
-    : that.excelFileName;
+    var fileName      = R.isEmpty(that.excelFileName) ? generateRandomFileName(10, randomCharString): that.excelFileName
+    var storagePath   = R.isEmpty(that.storagePath) ? __dirname : that.storagePath
+    var excelFilePath = storagePath + '/' + fileName + '.xlsx'
 
-    var storagePath = R.isEmpty(that.storagePath)
-    ? __dirname
-    : that.storagePath;
-
-    var excelFilePath =  storagePath + '/' + fileName + '.xlsx';
+    console.log("Excel file path : ", excelFilePath)
 
     try {
-      xlsx.writeFile(that.workbook, excelFilePath);
+      xlsx.writeFile(that.workbook, excelFilePath)
 
       var excelFileStream = fs.createReadStream(excelFilePath)
 
@@ -166,44 +158,93 @@ LocalExcelAdaptor.prototype.downloadFile = function() {
 				fs.unlinkSync(excelFilePath)
       })
       
-			resolve(excelFileStream); 
-    }
-    catch(err) {
+			resolve(excelFileStream)
+    } catch(err) {
       reject(generateErrorMessage('downloadFailed'))
     }
-
   })
 }
 
-//  private functions start here !! 
-
 /**
- * autocast the value according to dataType
+ * autoCast the value according to dataType
  */
-function autocast(excelValue, dataType){
-  
-  if (typeof excelValue === 'number' && dataType === 'string') {
-    return excelValue.toString();
-  }
+function autoCast(excelValue, dataType){
+  switch(dataType) {
+    case "string": 
+      excelValue = stringValidator(excelValue)
+      break;
 
-  if (typeof excelValue === 'string' && dataType === 'number') {
-    if(parseFloat(excelValue) === null)
-      return excelValue
-    else
-      return parseFloat(excelValue);
-  }
+    case "boolean":
+      excelValue = booleanValidator(excelValue)
+      break
 
-  if (typeof excelValue === 'string' && dataType === 'boolean'){
-    if (excelValue === 'true' || excelValue === 'True' || excelValue === 'TRUE' ){
-      return true;
-    }
-    else if (excelValue === 'false' || excelValue === 'False' || excelValue === 'FALSE' )
-      return false;
-    else
-      return excelValue;
+    case "number":
+      excelValue = numberValidator(excelValue)
+      break
+
+    // case "date":
+    //   console.log("Date datatype found")
+    //   excelValue = dateValidator(excelValue)
+    //   break;
   }
 
   return excelValue
+}
+
+function stringValidator(value) {
+  if(R.is(String, value)) {
+    return value
+  }
+
+  try {
+    value = value.toString()
+  } catch(err) {
+    value = null
+  }
+
+  return value
+}
+
+function numberValidator(value) {
+  if(R.is(Number, value)) {
+    return value
+  }
+
+  try {
+    value = parseInt(value)
+  } catch(err) {
+    value = null
+  }
+
+  return value
+}
+
+function booleanValidator(value) {
+  if(R.is(Boolean, value)) {
+    return value
+  }
+
+  if (value.toLowerCase() === 'true') {
+    value = true
+  } else if (value.toLowerCase() === 'false') {
+    value = false
+  }
+
+  return value
+}
+
+function dateValidator(value) {
+  if(R.is(Date, value)) {
+    return value
+  }
+
+  try {
+    value = new Date(value)
+  } catch(err) {
+    value = null
+  }
+
+  return value
 }
 
 /** 
@@ -230,9 +271,9 @@ function checkExcelValueDatatype (excelValue) {
 */
 function generateErrorMessage(errorMessage) {
   return {
-    errorKey: errorMessage,
+    errorKey : errorMessage,
     errorData: {},
-    errors: []
+    errors   : []
   }
 }
 
@@ -247,12 +288,13 @@ function getCellName(columnIndex, rowIndex) {
 	if (columnIndex > 25) {
     // logic to increase the column name in case of number of columns > 25
     // eg : AA1, AA2
-    var quotient = Math.floor(columnIndex/26) - 1 ;
-    var remainder = columnIndex % 26;
+    var quotient = Math.floor(columnIndex/26) - 1
+    var remainder = columnIndex % 26
     cellName = columnsList[quotient] + "" + columnsList[remainder] + "" + rowIndex
 	} else {
 		cellName = columnsList[columnIndex] + "" + rowIndex
-	}
+  }
+  
 	return cellName
 }
 
@@ -263,18 +305,17 @@ function getCellName(columnIndex, rowIndex) {
 */
 function validateColumnsArray(columnArray) {
   if (!R.is(Array, columnArray)) {
-    throw generateErrorMessage('invalidColumnArray');
+    throw generateErrorMessage('invalidColumnArray')
   }
 
   if (columnArray.length === 0) {
-    throw generateErrorMessage('noColumnsFound');
+    throw generateErrorMessage('noColumnsFound')
   }
 
   columnArray.forEach(function(column){
     if(!column.hasOwnProperty('columnName') || !column.hasOwnProperty('dataType')){
-      throw generateErrorMessage('invalidColumnArray');
+      throw generateErrorMessage('invalidColumnArray')
     }
-
     // columnName & dataType fields must be in Strinf format
     if (typeof column['columnName'] !== 'string' || typeof column['dataType'] !== 'string' ){
       throw generateErrorMessage('invalidColumnArray')
@@ -283,9 +324,7 @@ function validateColumnsArray(columnArray) {
     if(allowedDataTypes.indexOf(column['dataType'].toLowerCase()) == -1){
       throw generateErrorMessage('unsupportedDataType')
     }
-    
-  });
-
+  })
 }
 
 /**
@@ -295,7 +334,7 @@ function validateColumnsArray(columnArray) {
 */
 function validateRowsArray(excelRowsArray) {
   if (!R.is(Array, excelRowsArray)) {
-    throw generateErrorMessage('invalidExcelSheetRows');
+    throw generateErrorMessage('invalidExcelSheetRows')
   }
 }
 
@@ -306,7 +345,7 @@ function validateRowsArray(excelRowsArray) {
 */
 function validatelastRowIndex(lastRowIndex) {
   if (lastRowIndex == undefined || typeof lastRowIndex !== 'number'){
-    throw generateErrorMessage('noLastRowIndex');
+    throw generateErrorMessage('noLastRowIndex')
   }
 }
 
@@ -317,10 +356,10 @@ function validatelastRowIndex(lastRowIndex) {
 */
 function validateWorkBook(workbook) {
   if (R.isNil(workbook)){
-    throw generateErrorMessage('noWorkbookObjectFound');
+    throw generateErrorMessage('noWorkbookObjectFound')
   }
   if (!workbook.hasOwnProperty('Sheets')){
-    throw generateErrorMessage('invalidWorkBook');
+    throw generateErrorMessage('invalidWorkBook')
   }
 }
 
@@ -331,23 +370,21 @@ function validateWorkBook(workbook) {
  * @returns {string} - random string.
  */
 
-function randomString(length, chars) {
-  var result = '';
-  for (var i = length; i > 0; --i){
-    result += chars[Math.round(Math.random() * (chars.length - 1))];
+function generateRandomFileName(length, chars) {
+  var result = ''
+  for (var i = length; i > 0; --i) {
+    result += chars[Math.round(Math.random() * (chars.length - 1))]
   }
-  return result;
+  return result
 }
 
 function sanitizeString(value) {
-  var str = '';
+  var str = ''
   if (R.is(String, value))
-    var str = value.trim();
-  return str;
+    var str = value.trim()
+  return str
 }
 
 module.exports = function(options){
-  return new LocalExcelAdaptor(options);
+  return new LocalExcelAdaptor(options)
 }
-
-
