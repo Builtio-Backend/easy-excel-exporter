@@ -143,8 +143,6 @@ LocalExcelAdaptor.prototype.downloadFile = function() {
     var storagePath   = R.isEmpty(that.storagePath) ? __dirname : that.storagePath
     var excelFilePath = storagePath + '/' + fileName + '.xlsx'
 
-    console.log("Excel file path : ", excelFilePath)
-
     try {
       xlsx.writeFile(that.workbook, excelFilePath)
 
