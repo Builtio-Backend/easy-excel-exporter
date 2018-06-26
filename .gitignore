@@ -2,4 +2,4 @@ node_modules
 .tgz
 .txt
 package-lock.json
-.xlsx
+*.xlsx

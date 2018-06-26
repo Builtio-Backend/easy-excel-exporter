@@ -13,7 +13,7 @@ describe('Testing Excel Adaptor', function() {
   var excelSheetRows = [];
 
   beforeEach(function() {
-    excelAdapter = ExcelAdapter({
+    excelAdapter = ExcelAdapter({ 
       sheetName: 'my-new-sheet',
       autoCast  : false
     })
@@ -109,7 +109,7 @@ describe('Testing Excel Adaptor', function() {
   describe("Testing autoCast option in Excel Adapter", function() {
     it("Testing exceladapter with autocast false", function() {
       var sheetName = "Test Sheet"
-      var newExcelAdapter = new ExcelAdapter({
+      var newExcelAdapter = ExcelAdapter({
         sheetName : sheetName,
         autoCast  : false
       })
@@ -169,7 +169,7 @@ describe('Testing Excel Adaptor', function() {
   
     it("Testing exceladapter with autocast true", function() {
       var sheetName = "Test Sheet"
-      var newExcelAdapter = new ExcelAdapter({
+      var newExcelAdapter = ExcelAdapter({
         sheetName : sheetName,
         autoCast  : true
       })
@@ -229,7 +229,7 @@ describe('Testing Excel Adaptor', function() {
 
     it.skip("Should download file", function() {
       var sheetName = "Test Sheet"
-      var newExcelAdapter = new ExcelAdapter({
+      var newExcelAdapter = ExcelAdapter({
         sheetName : sheetName,
         autoCast  : false
       })
