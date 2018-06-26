@@ -3,21 +3,23 @@ const xlsx             = require('xlsx')
 const fs               = require('fs')
 const randomCharString = 'abcdefghijklmnopqrstuvwxyz0123456789'
 const allowedDataTypes = ['object', 'boolean', 'number', 'string', 'date']
+const errorMessages    = require("./error-messages.json")
 const columnsList      = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
-var LocalExcelAdaptor = R.curry(function(options){
-  this.workbook          = null
-  this.columnArray       = []
-  this.lastRowIndex      = 1
+var LocalExcelAdaptor = function(options) {
+  options             = options || {}
+  this.workbook       = null
+  this.columnArray    = []
+  this.lastRowIndex   = 1
   
-  this.excelSheetName    = R.isEmpty(sanitizeString(options.sheetName)) ? 'Sheet 1' : sanitizeString(options.sheetName)
+  this.excelSheetName = R.isEmpty(sanitizeString(options.sheetName)) ? 'Sheet 1': sanitizeString(options.sheetName)
 
-  this.excelFileName     = sanitizeString(options.fileName)
-  this.storagePath       = sanitizeString(options.path)
+  this.excelFileName  = sanitizeString(options.fileName)
+  this.storagePath    = sanitizeString(options.path)
 
   // Check for boolean type in autoCast
-  this.autoCast          = options.autoCast ? true : false
-})
+  this.autoCast       = options.autoCast ? true : false
+}
 
 /**
  * @param {Array} columnArray - array of objects with columnName & dataType
@@ -76,14 +78,16 @@ LocalExcelAdaptor.prototype.addObjects = function(excelSheetRows) {
     // validate workbook instance
     validateWorkBook(that.workbook)
 
+    // validate the lastRowIndex
+    validatelastRowIndex(that.lastRowIndex)
+
+    that.lastRowIndex = parseInt(that.lastRowIndex)
+
     // validate the columnArray.
     validateColumnsArray(that.columnArray)
 
     // validate the excelSheetRows.
     validateRowsArray(excelSheetRows)
-
-    // validate the lastRowIndex
-    validatelastRowIndex(that.lastRowIndex)
 
     // increase the ref rows in workbook sheet if the number of rows increase in excelSheetRows
     var lastCellRef = getCellName(that.columnArray.length - 1 , that.lastRowIndex + excelSheetRows.length)
@@ -102,24 +106,22 @@ LocalExcelAdaptor.prototype.addObjects = function(excelSheetRows) {
         excelValue = excelSheetRow[that.columnArray[columnIndex].columnName]
         dataType   = that.columnArray[columnIndex].dataType.toLowerCase()
 
-        if (R.isNil(excelValue)){
+        if (R.isNil(excelValue)) {
           continue
         }
 
         if (that.autoCast) {
           excelValue = autoCast(excelValue, dataType)
+        } else if(R.is(Object, excelValue)) {
+          excelValue = JSON.stringify(excelValue)
         }
         
         // if (typeof excelValue !== dataType){
         //   console.log(excelValue, typeof excelValue, dataType)
         //   continue
-        // }
+        // }        
 
-        if(R.is(Object, excelValue)){
-          excelValue = JSON.stringify(excelValue)
-        }
-
-        that.workbook.Sheets[that.excelSheetName][getCellName(columnIndex, that.lastRowIndex )] = {
+        that.workbook.Sheets[that.excelSheetName][getCellName(columnIndex, that.lastRowIndex)] = {
           t: checkExcelValueDatatype(excelValue),
           v: excelValue
         }
@@ -147,16 +149,16 @@ LocalExcelAdaptor.prototype.downloadFile = function() {
       xlsx.writeFile(that.workbook, excelFilePath)
 
       var excelFileStream = fs.createReadStream(excelFilePath)
-
       excelFileStream.on("end", function(data) {
 				fs.unlinkSync(excelFilePath)
 			})
 	
-			excelFileStream.on("error", function(err){
+			excelFileStream.on("error", function(err) {
 				fs.unlinkSync(excelFilePath)
       })
+
+      resolve(excelFileStream)
       
-			resolve(excelFileStream)
     } catch(err) {
       reject(generateErrorMessage('downloadFailed'))
     }
@@ -180,10 +182,13 @@ function autoCast(excelValue, dataType){
       excelValue = numberValidator(excelValue)
       break
 
-    // case "date":
-    //   console.log("Date datatype found")
-    //   excelValue = dateValidator(excelValue)
-    //   break;
+    case "date":
+      excelValue = dateValidator(excelValue)
+      break;
+
+    case "object":
+      excelValue = JSON.stringify(excelValue)
+      break;
   }
 
   return excelValue
@@ -253,9 +258,9 @@ function dateValidator(value) {
 function checkExcelValueDatatype (excelValue) {
   if(R.isNil(excelValue)) {
     return 'z'
-  } else if (typeof excelValue === 'boolean') {
+  } else if (R.is(Boolean,excelValue)) {
     return 'b'
-  } else if (typeof excelValue === 'number') {
+  } else if (R.is(Number,excelValue)) {
     return 'n'
   } else {
     return 's'
@@ -268,11 +273,7 @@ function checkExcelValueDatatype (excelValue) {
  * @return {object} - with errorKey, errorData and errors
 */
 function generateErrorMessage(errorMessage) {
-  return {
-    errorKey : errorMessage,
-    errorData: {},
-    errors   : []
-  }
+  return new Error(errorMessages[errorMessage])
 }
 
 /**
@@ -342,7 +343,7 @@ function validateRowsArray(excelRowsArray) {
   * throws error if any.
 */
 function validatelastRowIndex(lastRowIndex) {
-  if (lastRowIndex == undefined || typeof lastRowIndex !== 'number'){
+  if (!R.is(Number, lastRowIndex)) {
     throw generateErrorMessage('noLastRowIndex')
   }
 }

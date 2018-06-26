@@ -1,0 +1,11 @@
+{
+  "invalidColumnArray"   : "Please input a valid column array",		
+  "noColumnsFound"       : "No columns found while creating table header",		
+  "unsupportedDataType"  : "Invalid datatype in column array",			
+  "invalidExcelSheetRows": "Invalid input parameter in worksheet",			
+  "noLastRowIndex"       : "Invalid row found while updating worksheet",						
+  "noWorkbookObjectFound": "No workbook found",							
+  "invalidWorkBook"      : "Invalid workbook found",							
+  "downloadFailed"       : "Failed to download workbook",					
+  "defaultError"         : "Error in processing workbook" 
+}

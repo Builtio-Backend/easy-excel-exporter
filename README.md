@@ -1,21 +1,24 @@
 # About
-This nodejs module can be used to create an excel spread-sheet with set of header row and data rows.
+This NodeJS module can be used to create an Excel spreadsheets with set of header row and data rows.
 
-The headers can have a particular data-type and value.
+These cells can have a particular data-type and value.
 
 Each column will accomodate the data of particular data-type specified in the header row.
 
+NOTE: ExcelExporter only supports these below mentioned datatypes:<br><b>object, string, number, boolean, date.</b>
+
 # Initialize
 ```
-var excelAdapter = require('excel_adapter');
-var excel = new excelAdapter(options);
+var ExcelExporter = require('excel-exporter');
+var excelAdaptor  = ExcelExporter(options);
 ```
-option is an object used to create instance of excel_adapter.
+options is an object used to create instance of excel-exporter.
 
 ```
 options : {
   sheetName : 'this-is-an-optional-field',
   fileName  : 'this-is-an-optional-field',
+  autoCast  : 'this-is-an-optional-field'
 }
 ```
 
@@ -25,9 +28,9 @@ The module has three methods.
 ## createColumns
 To add header row
 ```
-excel.createColumns(headerRow);
+excelAdaptor.createColumns(headerRow);
 ```
-headerRow will be array of objects with name of every column and dataType for that column. eg:
+headerRow will be array of objects with name of every column and dataType for that column. <br>E.g.:
 
 ```
 var headerRow = [
@@ -37,12 +40,10 @@ var headerRow = [
 ]
 ```
 
-It will return the row index of the header row i.e 1.
-
 ## addObjects
 To add header row
 ```
-excel.addObjects(dataRows, lastRowIndex);
+excelAdaptor.addObjects(dataRows);
 ```
 
 dataRows will be array of objects to fill the data in the spreadsheet.
@@ -56,8 +57,8 @@ dataRows = [
 It will return the last row index of the data added in the spreadsheet
 
 ## downloadFile
-This will save the file on the system & returns the readStream for the file. Once the file is read it unlinks the file from the system.
+This will save the file on the system & return a stream of the file. Once the file is read, this temporary file is erased from your system.
 
 ```
-excel.downloadFile();
+excelAdaptor.downloadFile();
 ```
