@@ -1,6 +1,7 @@
 const R                = require('ramda')
 const xlsx             = require('xlsx')
 const fs               = require('fs')
+const validators       = require('./datatype-validators')
 const randomCharString = 'abcdefghijklmnopqrstuvwxyz0123456789'
 const allowedDataTypes = ['object', 'boolean', 'number', 'string', 'date']
 const errorMessages    = require("./error-messages.json")
@@ -171,19 +172,19 @@ LocalExcelAdaptor.prototype.downloadFile = function() {
 function autoCast(excelValue, dataType){
   switch(dataType) {
     case "string": 
-      excelValue = stringValidator(excelValue)
+      excelValue = validators.stringValidator(excelValue)
       break;
 
     case "boolean":
-      excelValue = booleanValidator(excelValue)
+      excelValue = validators.booleanValidator(excelValue)
       break
 
     case "number":
-      excelValue = numberValidator(excelValue)
+      excelValue = validators.numberValidator(excelValue)
       break
 
     case "date":
-      excelValue = dateValidator(excelValue)
+      excelValue = validators.dateValidator(excelValue)
       break;
 
     case "object":
@@ -192,62 +193,6 @@ function autoCast(excelValue, dataType){
   }
 
   return excelValue
-}
-
-function stringValidator(value) {
-  if(R.is(String, value)) {
-    return value
-  }
-
-  try {
-    value = value.toString()
-  } catch(err) {
-    value = null
-  }
-
-  return value
-}
-
-function numberValidator(value) {
-  if(R.is(Number, value)) {
-    return value
-  }
-
-  try {
-    value = parseInt(value)
-  } catch(err) {
-    value = null
-  }
-
-  return value
-}
-
-function booleanValidator(value) {
-  if(R.is(Boolean, value)) {
-    return value
-  }
-
-  if (value.toLowerCase() === 'true') {
-    value = true
-  } else if (value.toLowerCase() === 'false') {
-    value = false
-  }
-
-  return value
-}
-
-function dateValidator(value) {
-  if(R.is(Date, value)) {
-    return value
-  }
-
-  try {
-    value = new Date(value)
-  } catch(err) {
-    value = null
-  }
-
-  return value
 }
 
 /** 

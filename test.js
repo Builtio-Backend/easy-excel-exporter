@@ -498,7 +498,164 @@ describe('Testing Excel Adaptor', function() {
           assert.equal(err.message, getErrorMessage("invalidWorkBook"))
         })
     })
-  })  
+  })
+
+  describe('testing autocase for different datatypes', function(){
+    it("Should not autocast value", function() {
+      var sheetName = "Test Sheet"
+      var newExcelAdapter = ExcelAdapter({
+        sheetName : sheetName,
+        autoCast  : false
+      })
+  
+      var headers = [{
+        "columnName" : "Name",
+        "dataType"   : "string"
+      }, {
+        "columnName" : "Age",
+        "dataType"   : "number"
+      }, {
+        "columnName" : "Active",
+        "dataType"   : "Boolean"
+      }, {
+        "columnName" : "DOB",
+        "dataType"   : "date"
+      }, {
+        "columnName" : "City",
+        "dataType"   : "object"
+      }]
+  
+      var objects = [
+        {
+          "Name" : "Test 1",
+          "Age" : "25",
+          "Active" : true,
+          "DOB" : "1993-05-21T09:44:27.870Z",
+          "City" : {
+            "Address" : "Test Address"
+          }
+        },
+        {
+          "Name" : 123456,
+          "Age" : 30,
+          "Active" : "False",
+          "DOB" : "1988-04-11T09:44:27.870Z",
+          "City" : {
+            "Address" : "Test Address 2"
+          }
+        },
+        {
+          "Name" : "Test 3",
+          "Age" : "adkhdsdf",
+          "Active" : "TRUE",
+          "DOB" : true,
+          "City" : "Test Address 3"
+        }
+      ]
+
+      return newExcelAdapter.createColumns(headers)
+      .then(function() {
+        return newExcelAdapter.addObjects(objects)
+      })
+      .then(function(lastRowIndex) {
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["A2"].v), true)
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["B2"].v), true)
+        assert.equal(R.is(Boolean, newExcelAdapter.workbook.Sheets[sheetName]["C2"].v), true)
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["D2"].v), true)
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["E2"].v), true)
+
+        assert.equal(R.is(Number, newExcelAdapter.workbook.Sheets[sheetName]["A3"].v), true)
+        assert.equal(R.is(Number, newExcelAdapter.workbook.Sheets[sheetName]["B3"].v), true)
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["C3"].v), true)
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["D3"].v), true)
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["E3"].v), true)
+
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["A4"].v), true)
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["B4"].v), true)
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["C4"].v), true)
+        assert.equal(R.is(Boolean, newExcelAdapter.workbook.Sheets[sheetName]["D4"].v), true)
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["E4"].v), true)
+      })
+    })
+
+    it("Should autocast value", function() {
+      var sheetName = "Test Sheet"
+      var newExcelAdapter = ExcelAdapter({
+        sheetName : sheetName,
+        autoCast  : true
+      })
+  
+      var headers = [{
+        "columnName" : "Name",
+        "dataType"   : "string"
+      }, {
+        "columnName" : "Age",
+        "dataType"   : "number"
+      }, {
+        "columnName" : "Active",
+        "dataType"   : "Boolean"
+      }, {
+        "columnName" : "DOB",
+        "dataType"   : "date"
+      }, {
+        "columnName" : "City",
+        "dataType"   : "object"
+      }]
+  
+      var objects = [
+        {
+          "Name" : "Test 1",
+          "Age" : "25",
+          "Active" : true,
+          "DOB" : "1993-05-21T09:44:27.870Z",
+          "City" : {
+            "Address" : "Test Address"
+          }
+        },
+        {
+          "Name" : 123456,
+          "Age" : 30,
+          "Active" : "False",
+          "DOB" : "1988-04-11T09:44:27.870Z",
+          "City" : {
+            "Address" : "Test Address 2"
+          }
+        },
+        {
+          "Name" : "Test 3",
+          "Age" : "adkhdsdf",
+          "Active" : "TRUE",
+          "DOB" : true,
+          "City" : "Test Address 3"
+        }
+      ]
+
+      return newExcelAdapter.createColumns(headers)
+      .then(function() {
+        return newExcelAdapter.addObjects(objects)
+      })
+      .then(function(lastRowIndex) {
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["A2"].v), true)
+        assert.equal(R.is(Number, newExcelAdapter.workbook.Sheets[sheetName]["B2"].v), true)
+        assert.equal(R.is(Boolean, newExcelAdapter.workbook.Sheets[sheetName]["C2"].v), true)
+        assert.equal(R.is(Date, newExcelAdapter.workbook.Sheets[sheetName]["D2"].v), true)
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["E2"].v), true)
+
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["A3"].v), true)
+        assert.equal(R.is(Number, newExcelAdapter.workbook.Sheets[sheetName]["B3"].v), true)
+        assert.equal(R.is(Boolean, newExcelAdapter.workbook.Sheets[sheetName]["C3"].v), true)
+        assert.equal(R.is(Date, newExcelAdapter.workbook.Sheets[sheetName]["D3"].v), true)
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["E3"].v), true)
+
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["A4"].v), true)
+        assert.equal(isNaN(newExcelAdapter.workbook.Sheets[sheetName]["B4"].v), true)
+        assert.equal(R.is(Boolean, newExcelAdapter.workbook.Sheets[sheetName]["C4"].v), true)
+        assert.equal(R.is(Date, newExcelAdapter.workbook.Sheets[sheetName]["D4"].v), true)
+        assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["E4"].v), true)
+      })
+    })
+
+  })
 })
 
 function getErrorMessage(errorKey) {
