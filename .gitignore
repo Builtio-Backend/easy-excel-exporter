@@ -1,5 +1,5 @@
 node_modules
-.tgz
-.txt
+*.tgz
+*.txt
 package-lock.json
 *.xlsx

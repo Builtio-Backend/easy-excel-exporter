@@ -142,7 +142,7 @@ LocalExcelAdaptor.prototype.downloadFile = function() {
     validateWorkBook(that.workbook)
 
     var fileName      = R.isEmpty(that.excelFileName) ? generateRandomFileName(10, randomCharString): that.excelFileName
-    var storagePath   = R.isEmpty(that.storagePath) ? __dirname : that.storagePath
+    var storagePath   = R.isEmpty(that.storagePath) ? "." : that.storagePath
     var excelFilePath = storagePath + '/' + fileName + '.xlsx'
 
     try {
