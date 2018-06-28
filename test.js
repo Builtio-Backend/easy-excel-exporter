@@ -500,7 +500,7 @@ describe('Testing Excel Adaptor', function() {
     })
   })
 
-  describe('testing autocase for different datatypes', function(){
+  describe('Testing autoCast for different datatypes', function(){
     it("Should not autocast value", function() {
       var sheetName = "Test Sheet"
       var newExcelAdapter = ExcelAdapter({
@@ -654,7 +654,6 @@ describe('Testing Excel Adaptor', function() {
         assert.equal(R.is(String, newExcelAdapter.workbook.Sheets[sheetName]["E4"].v), true)
       })
     })
-
   })
 })
 

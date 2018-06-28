@@ -218,7 +218,8 @@ function checkExcelValueDatatype (excelValue) {
  * @return {object} - with errorKey, errorData and errors
 */
 function generateErrorMessage(errorMessage) {
-  return new Error(errorMessages[errorMessage])
+  errorMessage = errorMessages[errorMessage] ? errorMessages[errorMessage] : errorMessages["defaultError"]
+  return new Error(errorMessage)
 }
 
 /**
