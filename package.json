@@ -1,7 +1,7 @@
 {
   "name": "excel-exporter",
   "version": "1.0.0",
-  "description": "",
+  "description": "This NodeJS module can be used to create an Excel spreadsheets with set of header row and data rows.",
   "main": "index.js",
   "scripts": {
     "test": "mocha test.js"
@@ -13,9 +13,19 @@
     "mocha": "5.2.0"
   },
   "dependencies": {
-    "chai": "^4.1.2",
-    "mocha": "5.2.0",
     "ramda": "0.25.0",
     "xlsx": "0.13.0"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Builtio-Backend/excel-exporter.git"
+  },
+  "keywords": [
+    "Excel exporter",
+    "xlsx"
+  ],
+  "bugs": {
+    "url": "https://github.com/Builtio-Backend/excel-exporter/issues"
+  },
+  "homepage": "https://github.com/Builtio-Backend/excel-exporter#readme"
 }
