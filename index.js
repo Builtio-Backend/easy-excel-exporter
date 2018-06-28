@@ -2,12 +2,13 @@ const R                = require('ramda')
 const xlsx             = require('xlsx')
 const fs               = require('fs')
 const validators       = require('./datatype-validators')
+const errorMessages    = require("./error-messages.json")
+
 const randomCharString = 'abcdefghijklmnopqrstuvwxyz0123456789'
 const allowedDataTypes = ['object', 'boolean', 'number', 'string', 'date']
-const errorMessages    = require("./error-messages.json")
 const columnsList      = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"]
 
-var LocalExcelAdaptor = function(options) {
+var ExcelExporter = function(options) {
   options             = options || {}
   this.workbook       = null
   this.columnArray    = []
@@ -27,7 +28,7 @@ var LocalExcelAdaptor = function(options) {
  * @example [{columnName:email, dataType:String}]
  * @returns {number} rowIndex of column added
 */
-LocalExcelAdaptor.prototype.createColumns = function(columnArray) {
+ExcelExporter.prototype.createColumns = function(columnArray) {
   // Rename columnArray to excelColumns
   var that = this
   return new Promise(function(resolve, reject){
@@ -73,7 +74,7 @@ LocalExcelAdaptor.prototype.createColumns = function(columnArray) {
  * @param {Array} excelSheetRows - array of objects to be inserted into the excel spreadsheet. 
  * @returns {number} rowIndex of last inserted object.
 */
-LocalExcelAdaptor.prototype.addObjects = function(excelSheetRows) {
+ExcelExporter.prototype.addObjects = function(excelSheetRows) {
   var that = this
   return new Promise(function(resolve, reject){
     // validate workbook instance
@@ -115,12 +116,7 @@ LocalExcelAdaptor.prototype.addObjects = function(excelSheetRows) {
           excelValue = autoCast(excelValue, dataType)
         } else if(R.is(Object, excelValue)) {
           excelValue = JSON.stringify(excelValue)
-        }
-        
-        // if (typeof excelValue !== dataType){
-        //   console.log(excelValue, typeof excelValue, dataType)
-        //   continue
-        // }        
+        }      
 
         that.workbook.Sheets[that.excelSheetName][getCellName(columnIndex, that.lastRowIndex)] = {
           t: checkExcelValueDatatype(excelValue),
@@ -136,7 +132,7 @@ LocalExcelAdaptor.prototype.addObjects = function(excelSheetRows) {
 /**
  * writes the file in directory, reject errors if any
 */
-LocalExcelAdaptor.prototype.downloadFile = function() {
+ExcelExporter.prototype.downloadFile = function() {
   var that = this
   return new Promise(function(resolve, reject){
     // validate workbook object
@@ -233,9 +229,9 @@ function getCellName(columnIndex, rowIndex) {
 	if (columnIndex > 25) {
     // logic to increase the column name in case of number of columns > 25
     // eg : AA1, AA2
-    var quotient = Math.floor(columnIndex/26) - 1
+    var quotient  = Math.floor(columnIndex/26) - 1
     var remainder = columnIndex % 26
-    cellName = columnsList[quotient] + "" + columnsList[remainder] + "" + rowIndex
+    cellName      = columnsList[quotient] + "" + columnsList[remainder] + "" + rowIndex
 	} else {
 		cellName = columnsList[columnIndex] + "" + rowIndex
   }
@@ -261,10 +257,12 @@ function validateColumnsArray(columnArray) {
     if(!column.hasOwnProperty('columnName') || !column.hasOwnProperty('dataType')){
       throw generateErrorMessage('invalidColumnArray')
     }
+    
     // columnName & dataType fields must be in Strinf format
     if (typeof column['columnName'] !== 'string' || typeof column['dataType'] !== 'string' ){
       throw generateErrorMessage('invalidColumnArray')
     }
+
     //  column['dataType'] must be from allowed dataTypes only
     if(allowedDataTypes.indexOf(column['dataType'].toLowerCase()) == -1){
       throw generateErrorMessage('unsupportedDataType')
@@ -314,22 +312,23 @@ function validateWorkBook(workbook) {
  * @param {string} chars - character needed in random string
  * @returns {string} - random string.
  */
-
 function generateRandomFileName(length, chars) {
   var result = ''
   for (var i = length; i > 0; --i) {
     result += chars[Math.round(Math.random() * (chars.length - 1))]
   }
+
   return result
 }
 
 function sanitizeString(value) {
   var str = ''
   if (R.is(String, value))
-    var str = value.trim()
+    str = value.trim()
+
   return str
 }
 
 module.exports = function(options){
-  return new LocalExcelAdaptor(options)
+  return new ExcelExporter(options)
 }

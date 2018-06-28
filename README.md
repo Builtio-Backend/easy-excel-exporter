@@ -50,8 +50,8 @@ dataRows will be array of objects to fill the data in the spreadsheet.
 
 ```
 dataRows = [
-  {Name : 'abc', Age : 22, Profile : {}},
-  {Name : 'bcd', Age : 21},
+  {Name : "abc", Age : 22, Profile : {}},
+  {Name : "bcd", Age : 21},
 ]
 ```
 It will return the last row index of the data added in the spreadsheet
