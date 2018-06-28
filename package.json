@@ -1,5 +1,5 @@
 {
-  "name": "excel-exporter",
+  "name": "easy-excel-exporter",
   "version": "1.0.0",
   "description": "This NodeJS module can be used to create an Excel spreadsheets with set of header row and data rows.",
   "main": "index.js",
@@ -18,14 +18,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Builtio-Backend/excel-exporter.git"
+    "url": "git+https://github.com/Builtio-Backend/easy-excel-exporter.git"
   },
   "keywords": [
     "Excel exporter",
     "xlsx"
   ],
   "bugs": {
-    "url": "https://github.com/Builtio-Backend/excel-exporter/issues"
+    "url": "https://github.com/Builtio-Backend/easy-excel-exporter/issues"
   },
-  "homepage": "https://github.com/Builtio-Backend/excel-exporter#readme"
+  "homepage": "https://github.com/Builtio-Backend/easy-excel-exporter#readme"
 }

@@ -9,7 +9,7 @@ NOTE: ExcelExporter only supports these below mentioned datatypes:<br><b>object,
 
 # Initialize
 ```
-var ExcelExporter = require('excel-exporter');
+var ExcelExporter = require('easy-excel-exporter');
 var excelAdaptor  = ExcelExporter(options);
 ```
 options is an object used to create instance of excel-exporter.
