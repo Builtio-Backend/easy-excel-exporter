@@ -1,78 +1,74 @@
 # About
-This NodeJS module can be used to create an Excel spreadsheets with set of header row and data rows.
+This NodeJS module can be used to create Excel spreadsheets.
+Every cell has its own datatype associated with it and a value for that cell.
 
-These cells can have a particular data-type and value.
+easy-excel-exporter only supports these below mentioned types:<br><b>object, string, number, boolean, date.</b>
 
-Each column will accomodate the data of particular data-type specified in the header row.
-
-NOTE: ExcelExporter only supports these below mentioned datatypes:<br><b>object, string, number, boolean, date.</b>
-
-# Initialize
+# Initialization
 ```
 var EasyExcelExporter = require('easy-excel-exporter');
-var easyExcelExporter = EasyExcelExporter(options);
+var excelAdapter      = EasyExcelExporter(options);
 ```
-options is an object used to create instance of excel-exporter.
+options will be used to re-initialize default option values used to create Excel Spreadsheet.
 
 ```
 options : {
-  sheetName : 'sheet1', //optional
-  fileName  : 'file1', //optional
-  autoCast  : true //optional
-  path : '/home/work' //optional
+  sheetName : 'sheet-name', // String value for assigning your own Sheet Name.
+  fileName  : 'test-file', // String value for assigning a name for the Excel file created.
+  autoCast  : true // Boolean value that will indicate whether to type cast values for cells or not(Default : false).
+  path : '/<<file-path>>/' // String value to define your own storage path where the excel file will be saved.
 }
 ```
 
 # Methods
-The module has three methods.
+easy-excel-exporter provides three methods. All of which return a promise.
 
-## createColumns
-To add header row
+## createColumns(excelHeaders)
+This function creates a row in your Excel spreadsheet which contains the values of the column names as specified in excelHeaders.
 ```
-easyExcelExporter.createColumns(headerRow);
+excelAdapter.createColumns(excelHeaders);
 ```
-HeaderRow will be array of objects with name of every column and dataType for that column. <br>E.g.:
-
-```
-var headerRow = [
-  {columnName : 'Name', dataType : 'string'},
-  {columnName : 'Age', dataType : 'number'},
-  {columnName : 'Profile', dataType : 'object'},
-]
-```
-
-createColumns method returns promise.
-
-## addObjects
-To add data rows
-```
-easyExcelExporter.addObjects(dataRows);
-```
-
-dataRows will be array of objects to fill the data in the spreadsheet.
+excelHeaders is an array of objects with name for the column specified with <b>"columnName"</b> and its associated dataType specified as <b>"dataType"</b>.<br>E.g.:
 
 ```
-dataRows = [
-  {Name : "abc", Age : 22, Profile : {}},
-  {Name : "bcd", Age : 21},
-]
+var excelHeaders = [{
+  columnName: 'Name',
+  dataType: 'string'
+}, {
+  columnName: 'Age',
+  dataType: 'number'
+}, {
+  columnName: 'Profile',
+  dataType: 'object'
+}]
 ```
-It will return the last row index of the data added in the spreadsheet
+Once your columns have been set in the Excel spreadsheet, it will return a Promise.
 
-## downloadFile
-This will save the file on the system & returns a stream of the file. Once the file is read, this temporary file is erased from your system.
+## addObjects(rows)
+This function iterates through rows, which is an array of objects, that is provided as an argument. Each object will be treated as a row for the Excel Spreadsheet.
+```
+rows = [{
+  Name : "abc",
+  Age : 22,
+  Profile : {}
+}]
+
+excelAdapter.addObjects(rows);
+```
+This function will return an index of the last row that has been created in the Excel Spreadsheet.
+
+<b>NOTE:</b> Objects are always stringified when they are added to cells.
+
+## downloadFile()
+This function will return a downloadable stream of the Excel spreadsheet file created at a default storage path or the path specified in options while creating an instance of easy-excel-exporter.
 
 ```
-easyExcelExporter.downloadFile();
+excelAdapter.downloadFile();
 ```
 
 # Features
 
-## autocast
-<b>when autocast is set to false</b>, data is written directly in the spreadsheet. Typecasting of data is not involved in the process.
-
-For any cell if data is object then it is converted to string and then saved in spreadsheet.
-
-<b>when autocast is set to true</b>, data is typecasted as per the dataType of the column, mentioned in the header row.
-
-If the data is possible to be typecasted, then value is typecasted and inserted into cell else cell is set to null.    
+## autocast option
+If you set autocast option as <b>true</b> while creating easy-excel-exporter instance, value for that cell will be typecasted to the dataType of the column mentioned while creating spreadsheet columns.<br><br>If typecast fails, then the cell will contain a <b>null</b> value.
+<br><br>
+Default value for autocast is <b>false</b> which means that the <b>dataType</b> provided while creating columns will be ignored when Excel cell is being added for that corresponding column.    
