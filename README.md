@@ -9,16 +9,17 @@ NOTE: ExcelExporter only supports these below mentioned datatypes:<br><b>object,
 
 # Initialize
 ```
-var ExcelExporter = require('easy-excel-exporter');
-var excelAdaptor  = ExcelExporter(options);
+var EasyExcelExporter = require('easy-excel-exporter');
+var easyExcelExporter = EasyExcelExporter(options);
 ```
 options is an object used to create instance of excel-exporter.
 
 ```
 options : {
-  sheetName : 'this-is-an-optional-field',
-  fileName  : 'this-is-an-optional-field',
-  autoCast  : 'this-is-an-optional-field'
+  sheetName : 'sheet1', //optional
+  fileName  : 'file1', //optional
+  autoCast  : true //optional
+  path : '/home/work' //optional
 }
 ```
 
@@ -28,22 +29,24 @@ The module has three methods.
 ## createColumns
 To add header row
 ```
-excelAdaptor.createColumns(headerRow);
+easyExcelExporter.createColumns(headerRow);
 ```
-headerRow will be array of objects with name of every column and dataType for that column. <br>E.g.:
+HeaderRow will be array of objects with name of every column and dataType for that column. <br>E.g.:
 
 ```
 var headerRow = [
-  {columnName : Name, dataType : string},
-  {columnName : Age, dataType : number},
-  {columnName : Profile, dataType : Object},
+  {columnName : 'Name', dataType : 'string'},
+  {columnName : 'Age', dataType : 'number'},
+  {columnName : 'Profile', dataType : 'object'},
 ]
 ```
 
+createColumns method returns promise.
+
 ## addObjects
-To add header row
+To add data rows
 ```
-excelAdaptor.addObjects(dataRows);
+easyExcelExporter.addObjects(dataRows);
 ```
 
 dataRows will be array of objects to fill the data in the spreadsheet.
@@ -57,8 +60,19 @@ dataRows = [
 It will return the last row index of the data added in the spreadsheet
 
 ## downloadFile
-This will save the file on the system & return a stream of the file. Once the file is read, this temporary file is erased from your system.
+This will save the file on the system & returns a stream of the file. Once the file is read, this temporary file is erased from your system.
 
 ```
-excelAdaptor.downloadFile();
+easyExcelExporter.downloadFile();
 ```
+
+# Features
+
+## autocast
+<b>when autocast is set to false</b>, data is written directly in the spreadsheet. Typecasting of data is not involved in the process.
+
+For any cell if data is object then it is converted to string and then saved in spreadsheet.
+
+<b>when autocast is set to true</b>, data is typecasted as per the dataType of the column, mentioned in the header row.
+
+If the data is possible to be typecasted, then value is typecasted and inserted into cell else cell is set to null.    
