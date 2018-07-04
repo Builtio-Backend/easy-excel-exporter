@@ -104,6 +104,30 @@ describe('Testing Excel Adaptor', function() {
         assert.equal(excelAdapter.workbook.Sheets[sheetName]["C1"].v, columnArray[2].columnName)
       })
     })
+
+    it('adds array of columns to excel adapter object using enum dataType', function() {
+      columnArray = [{
+        columnName: 'Name',
+        dataType: ExcelAdapter.dataType.String
+      }, { 
+        columnName: 'Age',
+        dataType: 'number'
+      }, { 
+        columnName: 'Profile',
+        dataType: 'object'
+      }]
+      
+      return excelAdapter
+      .createColumns(columnArray)
+      .then(function() {
+        var sheetName = excelAdapter.excelSheetName
+        assert.equal(R.is(Array, excelAdapter.columnArray), true)
+        assert.equal(excelAdapter.columnArray.length, 3)
+        assert.equal(excelAdapter.workbook.Sheets[sheetName]["A1"].v, columnArray[0].columnName)
+        assert.equal(excelAdapter.workbook.Sheets[sheetName]["B1"].v, columnArray[1].columnName)
+        assert.equal(excelAdapter.workbook.Sheets[sheetName]["C1"].v, columnArray[2].columnName)
+      })
+    })
   })
 
   describe("Testing autoCast option in Excel Adapter", function() {
@@ -227,7 +251,7 @@ describe('Testing Excel Adaptor', function() {
       })
     })
 
-    it.skip("Should download file", function() {
+    it("Should download file", function() {
       var sheetName = "Test Sheet"
       var newExcelAdapter = ExcelAdapter({
         sheetName : sheetName,
@@ -281,6 +305,9 @@ describe('Testing Excel Adaptor', function() {
       })
       .then(function(lastRowIndex) {  
         return newExcelAdapter.downloadFile()
+      })
+      .then(function(stream){
+        assert.equal(typeof stream, 'object')
       })
     })
   })

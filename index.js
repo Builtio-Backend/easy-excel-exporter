@@ -332,3 +332,11 @@ function sanitizeString(value) {
 module.exports = function(options){
   return new ExcelExporter(options)
 }
+
+module.exports.dataType = {
+  Object : 'object',
+  String : 'string',
+  Date   : 'date',
+  Number : 'number',
+  Boolean: 'boolean'
+}
