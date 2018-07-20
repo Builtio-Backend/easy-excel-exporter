@@ -1,6 +1,6 @@
 {
   "name": "easy-excel-exporter",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This NodeJS module can be used to create an Excel spreadsheets with set of header row and data rows.",
   "main": "index.js",
   "scripts": {

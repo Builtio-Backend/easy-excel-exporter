@@ -1,0 +1,4 @@
+Version 1.0.1
+Date: 20th July 2018
+
+1. Updates the readme file for the module.
